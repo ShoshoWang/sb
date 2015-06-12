@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="chart1" style="height:250px;width: 550px; "></div>
+
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+    var myChart1;
+    var sData1 = (function () {
+        var data = [[79,66,91,65,85,77,42],[56,84,52,33,52,49,19],[0,0,0,6,31,22,103],[83,60,87,
+            78,90,77,61],[35,53,81,35,59,61,17],[9,42,0,0,0,2,9],[6,13,15,16,18,50,
+            3]];
+        var d = [];
+        var len = 7*7;
+        var value;
+        for(var i=0;i<data.length;i++){
+            for(var j=0;j<data[0].length;j++)
+                d.push([j,i,data[i][j]]);
+        }
+        return d;
+    })();
+
+
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+
+    require(
+            [
+                'echarts',
+                'echarts/chart/pie',
+                'echarts/chart/line',
+                'echarts/chart/scatter'
+            ],
+            function (ec) {
+                //--- 折柱 ---
+                myChart1 = ec.init(document.getElementById('chart1'));
+                myChart1.setOption(option1);
+            }
+    );
+
+
+
+    var option1 = {
+        color : ['rgba(255, 69, 0, 0.5)'],
+        tooltip : {
+            trigger: 'item',
+            formatter: "{b} : {c}"
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        xAxis : [
+            {
+                type: 'category',                // 坐标轴类型，横轴默认为类目轴，数值轴则参考yAxis说明
+                data: ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'],
+                axisTick:{
+                    show:false
+                },
+                axisLine:{
+                    show:false,
+                },
+                position:'top',
+            }
+        ],
+        yAxis : [
+            {   data: ['1', '10', '25', '30', '35', '40', '50'],
+                type: 'category',                   // 坐标轴类型，横轴默认为类目轴，数值轴则参考yAxis说明
+                axisTick:{
+                    show:false
+                },
+                axisLine:{
+                    show:false,
+                },
+            }
+        ],
+        animation: false,
+        series : [
+            {
+                type:'scatter',
+                symbol: 'none',
+                data: sData1
+            },
+
+        ]
+    };
+
+
+    function buildPieSeries(){
+        var xAxis1 = myChart1.component.xAxis.getAxis(0);
+        var yAxis1 = myChart1.component.yAxis.getAxis(0);
+        var len1 = sData1.length;
+        while (len1--) {
+            option1.series.push({
+                type: 'pie',
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : false
+                        },
+                        labelLine : {
+                            show : false
+                        }
+                    }
+                },
+                radius : Math.round(sData1[len1][2]/250*21),
+                center: [
+                    xAxis1.getCoordByIndex(sData1[len1][0]),
+                    yAxis1.getCoordByIndex(sData1[len1][1])
+                ],
+                data: [
+                    {name: 'contributions', value: sData1[len1][2]}
+                ]
+            })
+        }
+        option1.animation = true;
+        myChart1.setOption(option1, true);
+        window.onresize = buildPieSeries;
+    }
+    // 构造出一系列的饼图代替原来的散点，需要在散点画出来后才能获取到散点的坐标，setTimeout！
+    setTimeout(buildPieSeries, 100);
+</script>
+
+</body>
+</html>
